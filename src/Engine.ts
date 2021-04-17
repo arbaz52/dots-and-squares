@@ -4,7 +4,7 @@ export default class Engine {
   constructor(
     public canvas: HTMLCanvasElement,
     public ctx: CanvasRenderingContext2D,
-    public cells: number = 5,
+    public cells: number = 10,
     public padding: number = 24
   ) {}
 
@@ -19,7 +19,6 @@ export default class Engine {
     ctx.rect(0, 0, canvas.width, canvas.height);
     ctx.fill();
 
-    console.debug(this.getCellSize(), this.canvas.width, this.cells);
   }
 
   getCellSize() {
@@ -38,8 +37,8 @@ export default class Engine {
 
     const { ctx } = this;
 
-    for (let row = 0; row < this.cells + 2; row++) {
-      for (let col = 0; col < this.cells + 2; col++) {
+    for (let row = 0; row <= this.cells; row++) {
+      for (let col = 0; col <= this.cells; col++) {
         const { x, y } = this.getCoord(col, row);
 
         ctx.beginPath();
