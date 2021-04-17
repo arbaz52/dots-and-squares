@@ -1,7 +1,12 @@
+import { TPlayer } from "./Engine";
 import Point from "./Point";
 
 export default class Line {
-  constructor(public p1: Point, public p2: Point) {}
+  constructor(
+    public p1: Point,
+    public p2: Point,
+    public player: TPlayer = "green"
+  ) {}
 
   getDirection() {
     const x = this.p1.x - this.p2.x;

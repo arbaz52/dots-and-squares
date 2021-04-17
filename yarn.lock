@@ -2,6 +2,13 @@
 # yarn lockfile v1
 
 
+"@babel/runtime@^7.12.5":
+  version "7.13.10"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.13.10.tgz#47d42a57b6095f4468da440388fdbad8bebf0d7d"
+  integrity sha512-4QPkjJq6Ns3V/RgpEahRk+AGfL0eO6RHHtTWoNNr5mO49G6B5+X6d6THgWEAvTrznU5xYpbAlVKRYcsCgh/Akw==
+  dependencies:
+    regenerator-runtime "^0.13.4"
+
 colorette@^1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/colorette/-/colorette-1.2.2.tgz#cbcc79d5e99caea2dbf10eb3a26fd8b3e6acfa94"
@@ -46,6 +53,13 @@ path-parse@^1.0.6:
   resolved "https://registry.yarnpkg.com/path-parse/-/path-parse-1.0.6.tgz#d62dbb5679405d72c4737ec58600e9ddcf06d24c"
   integrity sha512-GSmOT2EbHrINBf9SR7CDELwlJ8AENk3Qn7OikK4nFYAu3Ote2+JYNVvkpAEQm3/TLNEJFD/xZJjzyxg3KBWOzw==
 
+polished@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/polished/-/polished-4.1.1.tgz#40442cc973348e466f2918cdf647531bb6c29bfb"
+  integrity sha512-4MZTrfPMPRLD7ac8b+2JZxei58zw6N1hFkdBDERif5Tlj19y3vPoPusrLG+mJIlPTGnUlKw3+yWz0BazvMx1vg==
+  dependencies:
+    "@babel/runtime" "^7.12.5"
+
 postcss@^8.2.1:
   version "8.2.10"
   resolved "https://registry.yarnpkg.com/postcss/-/postcss-8.2.10.tgz#ca7a042aa8aff494b334d0ff3e9e77079f6f702b"
@@ -54,6 +68,11 @@ postcss@^8.2.1:
     colorette "^1.2.2"
     nanoid "^3.1.22"
     source-map "^0.6.1"
+
+regenerator-runtime@^0.13.4:
+  version "0.13.7"
+  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.13.7.tgz#cac2dacc8a1ea675feaabaeb8ae833898ae46f55"
+  integrity sha512-a54FxoJDIr27pgf7IgeQGxmqUNYrcV338lf/6gH456HZ/PhX+5BcwHXG9ajESmwe6WRO0tAzRUrRmNONWgkrew==
 
 resolve@^1.19.0:
   version "1.20.0"

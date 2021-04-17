@@ -1,7 +1,9 @@
 import Box from "./Box";
 import Line from "./Line";
 import Point from "./Point";
+import { transparentize } from "polished";
 
+export type TPlayer = "red" | "green";
 export default class Engine {
   private mouse?: Point;
   private closest?: Point;
@@ -13,8 +15,9 @@ export default class Engine {
   constructor(
     public canvas: HTMLCanvasElement,
     public ctx: CanvasRenderingContext2D,
-    public cells: number = 10,
-    public padding: number = 48
+    public cells: number = 6,
+    public padding: number = 48,
+    public currentPlayer: TPlayer = "green"
   ) {}
 
   resize() {
@@ -72,12 +75,13 @@ export default class Engine {
   _drawLines() {
     const { ctx } = this;
 
-    for (let { p1, p2 } of this.lines) {
+    for (let { p1, p2, player } of this.lines) {
       const _p1 = this.getCoord(p1.x, p1.y);
       const _p2 = this.getCoord(p2.x, p2.y);
 
       ctx.beginPath();
-      ctx.strokeStyle = "white";
+      ctx.strokeStyle = player;
+      ctx.lineWidth = 4;
       ctx.moveTo(_p1.x, _p1.y);
       ctx.lineTo(_p2.x, _p2.y);
       ctx.stroke();
@@ -86,7 +90,8 @@ export default class Engine {
     if (this.startingPoint && this.mouse) {
       const _start = this.getCoord(this.startingPoint.x, this.startingPoint.y);
       ctx.beginPath();
-      ctx.strokeStyle = "red";
+      ctx.strokeStyle = transparentize(0.25, this.currentPlayer);
+      ctx.lineWidth = 4
       ctx.moveTo(_start.x, _start.y);
       ctx.lineTo(this.mouse.x, this.mouse.y);
       ctx.stroke();
@@ -118,13 +123,13 @@ export default class Engine {
   _drawBoxes() {
     const { ctx } = this;
 
-    for (let { northWest } of this.boxes) {
+    for (let { northWest, player } of this.boxes) {
       const _northWest = this.getCoord(northWest.x, northWest.y);
 
       const cellSize = this.getCellSize();
 
       ctx.beginPath();
-      ctx.fillStyle = "rgba(255,255,255,0.25)";
+      ctx.fillStyle = transparentize(0.75, player);
 
       ctx.rect(_northWest.x, _northWest.y, cellSize, cellSize);
       ctx.fill();
@@ -149,6 +154,7 @@ export default class Engine {
   }
 
   getBoxes(line: Line) {
+    const boxes: Box[] = [];
     const direction = line.getDirection();
 
     console.debug(direction);
@@ -190,8 +196,8 @@ export default class Engine {
           ) {
             console.debug("west side");
 
-            const box = new Box(new Point(endX - 1, endY));
-            this.boxes.push(box);
+            const box = new Box(new Point(endX - 1, endY), this.currentPlayer);
+            boxes.push(box);
           }
 
           if (
@@ -202,8 +208,8 @@ export default class Engine {
           ) {
             console.debug("east side");
 
-            const box = new Box(end);
-            this.boxes.push(box);
+            const box = new Box(end, this.currentPlayer);
+            boxes.push(box);
           }
         }
         break;
@@ -244,8 +250,8 @@ export default class Engine {
             )
           ) {
             console.debug("west side");
-            const box = new Box(new Point(endX - 1, endY));
-            this.boxes.push(box);
+            const box = new Box(new Point(endX - 1, endY), this.currentPlayer);
+            boxes.push(box);
           }
 
           if (
@@ -255,8 +261,8 @@ export default class Engine {
             )
           ) {
             console.debug("east side");
-            const box = new Box(end);
-            this.boxes.push(box);
+            const box = new Box(end, this.currentPlayer);
+            boxes.push(box);
           }
         }
         break;
@@ -297,8 +303,11 @@ export default class Engine {
             )
           ) {
             console.debug("north side");
-            const box = new Box(new Point(startX, startY - 1));
-            this.boxes.push(box);
+            const box = new Box(
+              new Point(startX, startY - 1),
+              this.currentPlayer
+            );
+            boxes.push(box);
           }
 
           if (
@@ -308,8 +317,8 @@ export default class Engine {
             )
           ) {
             console.debug("south side");
-            const box = new Box(new Point(startX, startY));
-            this.boxes.push(box);
+            const box = new Box(new Point(startX, startY), this.currentPlayer);
+            boxes.push(box);
           }
         }
         break;
@@ -350,8 +359,11 @@ export default class Engine {
             )
           ) {
             console.debug("north side");
-            const box = new Box(new Point(startX, startY - 1));
-            this.boxes.push(box);
+            const box = new Box(
+              new Point(startX, startY - 1),
+              this.currentPlayer
+            );
+            boxes.push(box);
           }
 
           if (
@@ -361,8 +373,8 @@ export default class Engine {
             )
           ) {
             console.debug("south side");
-            const box = new Box(new Point(startX, startY));
-            this.boxes.push(box);
+            const box = new Box(new Point(startX, startY), this.currentPlayer);
+            boxes.push(box);
           }
         }
         break;
@@ -370,17 +382,27 @@ export default class Engine {
       default:
         console.error("direction undefined");
     }
+    this.boxes.push(...boxes);
+    return boxes;
   }
 
+  togglePlayer() {
+    this.currentPlayer = this.currentPlayer === "green" ? "red" : "green";
+  }
   handleMouseUp(ev: MouseEvent) {
     const { clientX, clientY } = ev;
     if (this.startingPoint) {
       const endingPoint = this.getClosestPointTo(clientX, clientY);
-      const line = new Line(this.startingPoint, endingPoint);
+      const line = new Line(
+        this.startingPoint,
+        endingPoint,
+        this.currentPlayer
+      );
       if (line.isValid() && !this.lines.some((_line) => _line.isEqual(line))) {
         console.debug("adding");
-        this.getBoxes(line);
+        const boxesAdded = this.getBoxes(line).length;
         this.lines.push(line);
+        if (boxesAdded == 0) this.togglePlayer();
       }
     }
     this.startingPoint = undefined;
@@ -406,11 +428,16 @@ export default class Engine {
     const { clientX, clientY } = touches[0];
     if (this.startingPoint) {
       const endingPoint = this.getClosestPointTo(clientX, clientY);
-      const line = new Line(this.startingPoint, endingPoint);
+      const line = new Line(
+        this.startingPoint,
+        endingPoint,
+        this.currentPlayer
+      );
       if (line.isValid() && !this.lines.some((_line) => _line.isEqual(line))) {
         console.debug("adding");
-        this.getBoxes(line);
+        const boxesAdded = this.getBoxes(line).length;
         this.lines.push(line);
+        if (boxesAdded == 0) this.togglePlayer();
       }
     }
     this.startingPoint = undefined;
