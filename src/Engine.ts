@@ -3,7 +3,7 @@ import Line from "./Line";
 import Point from "./Point";
 
 export default class Engine {
-  private mouse: Point = new Point(-100, -100);
+  private mouse?: Point;
   private closest?: Point;
 
   public startingPoint?: Point;
@@ -94,6 +94,8 @@ export default class Engine {
   }
 
   _drawMouse() {
+    if (!this.mouse) return;
+
     const {
       ctx,
       mouse: { x, y },
@@ -386,6 +388,40 @@ export default class Engine {
 
   handleMouseMove(ev: MouseEvent) {
     const { clientX, clientY } = ev;
+    if (!this.mouse) this.mouse = new Point(0, 0);
+    this.mouse.x = clientX;
+    this.mouse.y = clientY;
+
+    this.closest = this.getClosestPointTo(clientX, clientY);
+  }
+
+  handleTouchStart(ev: TouchEvent) {
+    const { touches } = ev;
+    const { clientX, clientY } = touches[0];
+
+    this.startingPoint = this.getClosestPointTo(clientX, clientY);
+  }
+  handleTouchEnd(ev: TouchEvent) {
+    const { changedTouches: touches } = ev;
+    const { clientX, clientY } = touches[0];
+    if (this.startingPoint) {
+      const endingPoint = this.getClosestPointTo(clientX, clientY);
+      const line = new Line(this.startingPoint, endingPoint);
+      if (line.isValid() && !this.lines.some((_line) => _line.isEqual(line))) {
+        console.debug("adding");
+        this.getBoxes(line);
+        this.lines.push(line);
+      }
+    }
+    this.startingPoint = undefined;
+    this.closest = undefined;
+    this.mouse = undefined;
+  }
+
+  handleTouchMove(ev: TouchEvent) {
+    const { touches } = ev;
+    const { clientX, clientY } = touches[0];
+    if (!this.mouse) this.mouse = new Point(0, 0);
     this.mouse.x = clientX;
     this.mouse.y = clientY;
 
@@ -398,6 +434,10 @@ export default class Engine {
 
     this.canvas.onmousedown = this.handleMouseDown.bind(this);
     this.canvas.onmouseup = this.handleMouseUp.bind(this);
+
+    this.canvas.ontouchstart = this.handleTouchStart.bind(this);
+    this.canvas.ontouchend = this.handleTouchEnd.bind(this);
+    this.canvas.ontouchmove = this.handleTouchMove.bind(this);
 
     this.canvas.onmousemove = this.handleMouseMove.bind(this);
 
